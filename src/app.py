@@ -15,6 +15,8 @@ CORS(app)
 # create the jackson family object
 jackson_family = FamilyStructure("Jackson")
 
+# Verificar que los miembros se agregaron correctamente
+print(jackson_family)
 # Handle/serialize errors like a JSON object
 @app.errorhandler(APIException)
 def handle_invalid_usage(error):
@@ -25,18 +27,28 @@ def handle_invalid_usage(error):
 def sitemap():
     return generate_sitemap(app)
 
-@app.route('/members', methods=['GET'])
-def handle_hello():
+@app.route('/members')
+def get_all_members():
+    members =  jackson_family.get_all_members()
+    return jsonify(members), 200
+@app.route('/members', methods=['POST'])
 
-    # this is how you can use the Family datastructure by calling its methods
-    members = jackson_family.get_all_members()
-    response_body = {
-        "hello": "world",
-        "family": members
-    }
+def add_member():
+    added_member = jackson_family.add_member()
+    return jsonify(added_member)
+@app.route('/member/<int:id>', methods=['GET'])
 
+def get_member(id):
+    member = jackson_family.get_member(id)
+    if member:
+        return jsonify(member), 200
+    else:
+        return jsonify({"msg": "Member not found"}), 404
+@app.route('/member/<int:id>', methods=['DELETE'])
 
-    return jsonify(response_body), 200
+def delete_member(id):
+    result = jackson_family.delete_member(id)
+    return jsonify(result)
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
